@@ -1,0 +1,5 @@
+Model,Test on,Accuracy
+Clean-trained,Clean val,0.88
+Clean-trained,Distorted val,0.665
+Distorted-trained,Distorted val,0.775
+Distorted-trained,Clean val,0.825
