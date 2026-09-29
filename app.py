@@ -6,7 +6,8 @@ import gdown
 import os
 
 MODEL_PATH = "qr_cnn_clean_model.keras"
-DRIVE_FILE_ID = "YOUR_FILE_ID_HERE"
+DRIVE_FILE_ID = "1d4wJzFv0QFtyQS9GtiRc9OLNFPNsSGiY"
+
 
 @st.cache_resource
 def load_model():
