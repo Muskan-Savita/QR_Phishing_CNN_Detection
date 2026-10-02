@@ -75,3 +75,17 @@ Tech
 
 Python, TensorFlow / Keras, NumPy, pandas, Pillow, Matplotlib, Google Colab.
 
+## Real-World Testing
+
+The deployed app was tested with QR codes outside the original dataset to check real-world reliability.
+
+| # | Image | Actual | Predicted | Confidence | Match |
+|---|---|---|---|---|---|
+| 1 | qrcode_407605471...(1).png | Malicious | Malicious | 95.9% | ✅ |
+| 2 | qrcode_407605471...(2).png | Malicious | Malicious | 95.9% | ✅ |
+| 3 | qr_09e05f6b...png | Benign | Benign | 78.8% | ✅ |
+
+**Result:** 3/3 correct on this small real-world sample.
+
+**Note:** The model classifies based on visual patterns in the QR image (not by decoding and checking the URL itself), so it can be fooled by a malicious URL rendered as a visually "clean" QR code, or flag an unusual-looking but safe QR as suspicious.
+
