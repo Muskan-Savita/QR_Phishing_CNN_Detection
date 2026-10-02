@@ -77,7 +77,7 @@ def show_single_result(img):
                 overlay = overlay_heatmap(img, heatmap)
                 st.image(overlay, caption="Model kahan dekh raha hai", width=250)
             except Exception as e:
-                st.write("Heatmap is baar nahi ban paya.")
+                st.write(f"Heatmap error: {e}")
         else:
             st.write("Heatmap uplabdh nahi (conv layer nahi mila)")
 
