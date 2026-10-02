@@ -41,9 +41,18 @@ def predict(img):
     return label, confidence, arr
 
 def make_gradcam(img_array, layer_name):
-    grad_model = tf.keras.models.Model(
-        inputs=model.inputs, outputs=[model.get_layer(layer_name).output, model.output]
-    )
+    # Rebuild the forward pass layer-by-layer on a fresh Input tensor.
+    # This avoids a Keras 3 issue where a loaded Sequential model's
+    # .output/.inputs don't expose a usable graph for intermediate layers.
+    inputs = tf.keras.Input(shape=(128, 128, 3))
+    x = inputs
+    conv_output = None
+    for layer in model.layers:
+        x = layer(x)
+        if layer.name == layer_name:
+            conv_output = x
+    grad_model = tf.keras.models.Model(inputs=inputs, outputs=[conv_output, x])
+
     with tf.GradientTape() as tape:
         conv_out, preds = grad_model(img_array)
         loss = preds[:, 0]
@@ -77,7 +86,7 @@ def show_single_result(img):
                 overlay = overlay_heatmap(img, heatmap)
                 st.image(overlay, caption="Model kahan dekh raha hai", width=250)
             except Exception as e:
-                st.write(f"Heatmap error: {e}")
+                st.write("Heatmap is baar nahi ban paya.")
         else:
             st.write("Heatmap uplabdh nahi (conv layer nahi mila)")
 
