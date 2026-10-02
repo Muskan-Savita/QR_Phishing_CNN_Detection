@@ -14,7 +14,12 @@ def load_model():
     if not os.path.exists(MODEL_PATH):
         url = f"https://drive.google.com/uc?id={DRIVE_FILE_ID}"
         gdown.download(url, MODEL_PATH, quiet=False)
-    return tf.keras.models.load_model(MODEL_PATH)
+    m = tf.keras.models.load_model(MODEL_PATH)
+    # Warm-up call: forces Keras to fully build the model's internal graph.
+    # Without this, reading an intermediate layer's output (for Grad-CAM)
+    # can raise an AttributeError on freshly loaded models.
+    _ = m.predict(np.zeros((1, 128, 128, 3), dtype="float32"), verbose=0)
+    return m
 
 model = load_model()
 
@@ -37,7 +42,7 @@ def predict(img):
 
 def make_gradcam(img_array, layer_name):
     grad_model = tf.keras.models.Model(
-        [model.inputs], [model.get_layer(layer_name).output, model.output]
+        inputs=model.inputs, outputs=[model.get_layer(layer_name).output, model.output]
     )
     with tf.GradientTape() as tape:
         conv_out, preds = grad_model(img_array)
@@ -67,9 +72,12 @@ def show_single_result(img):
         st.image(img, caption="Original QR", width=250)
     with col2:
         if LAST_CONV_LAYER:
-            heatmap = make_gradcam(arr, LAST_CONV_LAYER)
-            overlay = overlay_heatmap(img, heatmap)
-            st.image(overlay, caption="Model kahan dekh raha hai", width=250)
+            try:
+                heatmap = make_gradcam(arr, LAST_CONV_LAYER)
+                overlay = overlay_heatmap(img, heatmap)
+                st.image(overlay, caption="Model kahan dekh raha hai", width=250)
+            except Exception as e:
+                st.write("Heatmap is baar nahi ban paya.")
         else:
             st.write("Heatmap uplabdh nahi (conv layer nahi mila)")
 
